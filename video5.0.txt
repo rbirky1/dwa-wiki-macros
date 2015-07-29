@@ -1,0 +1,186 @@
+## Macro Name: video
+## Visibility: Visible to all
+## Macro Title: video
+## Description: Displays a training or other video, as either an embedded window, or a text link that opens in a new window.
+## Categories: External Content, Media
+## Icon URL: http://web.dreamworksanimation.com/Confluence/macroicons/media.png
+## Documentation URL: http://mydw.anim.dreamworks.com/display/WIKIDOC/Videos+in+Wiki+Pages+-+The+video+macro
+## Macro Body Processing: No macro body
+## Output Format: HTML
+##
+## @param video:title=Video File|type=string|desc=Pathname for the video file.
+## @param style:title=Style|type=enum|enumValues=text,embed,thumbnail|default=text|Style 'embed' displays an embedded video window.
+## @param title:title=Display Text (for style=text)|type=string|default=Click to launch video|desc=Text for 'text' display.
+## @param tip:title=Tool Tip|type=string|default=Click to open in a separate window.|desc=Tool tip to display for the link.
+## @param thumb:title=Thumbnail File (for style=thumbnail)|type=string|desc=Note: Best if in the same directory as video file.
+## @param doc:title=Doc Directory|type=string|desc=Sets path for a documentation video.
+## @param dept:title=Dept Directory|type=string|desc=Sets path for a department video. 
+## @param show:title=Show Directory|type=string|desc=Sets path for show video.
+## @param location:title=Other Directory|type=string|desc=Sets path for a non-dept, non-show, or non-doc directory.
+## @param width:title=Window Width|type=int|desc=With style='embed' or 'thumbnail', the width of the window. Defaults to 320 for Youtube, 500 otherwise.
+## @param height:title=Window Height|type=int|desc=Sets the height of the window. Leave blank to compute based on width.
+## @param border:title=Window Border|type=int|default=0|desc=With style='embed', the border width.
+##
+#if ($paramvideo)
+    #set ($videofile = $paramvideo.trim())
+#elseif ($param0)
+    #set ($videofile = $param0.trim())
+#elseif ($paramurl)
+    #set ($videofile = $paramurl.trim())
+#else
+    #set($videofile="FooFighers")
+    <p>Please provide the Video File. (See Documentation.)</p>
+    #stop
+#end
+#if ($paramstyle == 'thumbnail' && !$paramthumb)
+    #set($substr = $videofile.substring(0,$videofile.lastIndexOf("/")))
+    #set($thumb = "/slate.png")
+    #set($paramthumb = "$substr$thumb")
+#end
+##
+#set ($url="http://web.anim.dreamworks.com/studio/train/streaming/")
+## The following was set up to deliver an alternate URL for India ... but was not needed, as this is handled at the proxy level.
+##set($grouplist=$userAccessor.getGroupsAsList($action.remoteUser))
+#foreach($group in $grouplist)
+    #if ($group=="ddu-india")
+        #set($url="http://streaming.ddu-india.com/studio/train/streaming/")
+    #end
+#end
+#if($paramtip)
+    #set($tip=$paramtip)
+#else
+    #set($tip="Click to open in a separate window.")
+#end
+##
+############################################################################################################
+## Determine the window size.
+#set ($intObject = 0)    ## Need an integer object to call parseInt below.
+#if ($paramwidth && $paramheight)       ## Both specified by user.
+    #set ($windowsize = "width='$paramwidth' height='$paramheight'")
+############################################################################################################
+#elseif ($paramwidth)                   ## Only width specified by user.
+    #if ($paramstyle == 'thumbnail')
+	#if ($paramwidth == 'Original')
+		#set ($windowsize = "") 			## Use original image size ##NEW
+	#else
+		#set ($windowsize = "width='$paramwidth'")      ## Built-in player will compute aspect ratio.
+	#end
+    #elseif ($vidType == 'ogg' || $vidType == 'ogv' || $vidType == 'mp4')
+	#set ($windowsize = "width='$paramwidth'")
+    #else
+        #set ($paramwidth = $paramwidth.replaceAll("[^\d]",""))    ## In case it's something like '500px'.
+        #set ($heightInt = $intObject.parseInt($paramwidth) * 3/4)      ## Using 4:3 ratio.
+        #set ($windowsize = "width='$paramwidth' height='$heightInt'")
+    #end
+############################################################################################################
+#elseif ($paramheight)                  ## Only height specified by users.
+    #if ($paramstyle == 'thumbnail')
+	#if ($paramheight == 'Original')
+		#set ($windowsize = "")				## Use original image size ##NEW
+	#else
+		#set ($windowsize = "height='$paramheight'")      ## Built-in player will compute aspect ratio.
+	#end
+    #elseif ($vidType == 'ogg' || $vidType == 'ogv' || $vidType == 'mp4')
+	#set ($windowsize = "height='$paramheight'")
+    #else
+        #set ($paramheight = $paramheight.replaceAll("[^\d]",""))    ## In case it's something like '500px'.
+        #set ($widthInt = $intObject.parseInt($paramheight) * 4/3)      ## Using 4:3 ratio.
+        #set ($windowsize = "width='$widthInt' height='$paramheight'")
+    #end
+############################################################################################################
+#else                                   ## No size parameters set.  Use default.
+    #if ($videofile.contains("http"))                   ## This is a YouTube video
+        #set ($windowsize = "width='320'")
+    #elseif ($vidType == 'ogg' || $vidType == 'ogv' || $vidType == 'mp4' || $paramstyle == 'thumbnail')    ## This is an 'ogv' file.
+        #set ($windowsize = "width='500'")
+    #else                                               ## All other videos.
+        #set ($windowsize = "width='500' height='375'") ## Note: using 4:3 aspect ratio.
+    #end
+#end
+############################################################################################################
+#if ($videofile.contains("http"))       ## This is a YouTube video
+    #set($begin=$videofile.indexOf('='))
+    #set($begin=$begin+1)
+    #set($id=$videofile.substring($begin))
+    <object $windowsize>
+        <param name="movie" value="http://www.youtube.com/v/$id&hl=en&fs=1&rel=0"></param>
+        <param name="allowFullScreen" value="true"></param>
+        <param name="allowscriptaccess" value="always"></param>
+        <embed src="http://www.youtube.com/v/$id&hl=en&fs=1&rel=0" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" $windowsize></embed>
+    </object>
+#else ##This is a DreamWorks video
+    ## Determine the base URL for the video.
+    #if($paramlocation)
+	#set($url="http://dept.anim.dreamworks.com/work/$paramlocation/video/")
+    #elseif($paramdept) 
+	#set($url="http://dept.anim.dreamworks.com/work/$paramdept/video/")
+    #elseif($paramdoc) 
+	#set($url="http://doc.anim.dreamworks.com/$paramdoc/video/")
+    #elseif($paramshow)
+	#set($url="http://web.anim.dreamworks.com/studio/$paramshow/")
+    #elseif ($videofile.indexOf('/') == 0)      ## Video File parameter appears to be an absolute path.
+        #if ($videofile.contains("/studio"))
+            #set ($url="http://web.anim.dreamworks.com")
+        #elseif ($videofile.contains("/work/intranet/dept"))
+            #set ($url="http://dept.anim.dreamworks.com")
+        #elseif ($videofile.contains("/work/intranet/doc"))
+            #set ($url="http://doc.anim.dreamworks.com")
+        #elseif ($videofile.contains("/work/intranet/info"))
+            #set ($url="http://info.anim.dreamworks.com")
+        #elseif ($videofile.contains("/work/intranet/shows"))
+            #set ($url="http://show.anim.dreamworks.com")
+        #elseif ($videofile.contains("/work/intranet/rwcweb"))
+            #set ($url="http://web.dreamworksanimation.com")
+        #else
+            #set ($videofile = $videofile.substring(1))  ## Don't treat as abs-path ... Strip the initial '/'.  (MYDW-4362.)
+        #end
+    #end
+############################################################################################################
+    #if ($paramthumb)
+        #set($thumbpath=$url.concat($paramthumb))
+    #end
+    #set($url=$url.concat($videofile))
+    #if(not $paramborder)
+      #set($paramborder='0')
+    #end
+    #if(not $paramtitle)
+      #set($paramtitle='Click to launch video')
+    #end
+    #set($startPos=$videofile.length() - 3 )
+    #set($vidType=$videofile.substring($startPos))
+    ##
+    ## Build the new-window hyperlink so that it opens in a new window.
+    ## Note: This replaces the old calls to the 'link-window' macro, which produced problems in Preview and Macro Browser.
+    #set($aparms="rel='nofollow' class='external-link' title='$tip' onkeypress='return this.click()' target='_blank' href='$url'")
+    #set($wparams='"')      ## Having to do this kludginess to get the double-quotes inside the string.  Escaping did not work.
+    #set($wparams=$wparams.concat($url))
+    #set($wparams=$wparams.concat('", "_blank", "width=null,height=null,scrollbars=yes,toolbar=yes,location=yes,statusbar=yes,menubar=yes,resizable=yes"'))
+    #set($onclick="onclick='if (!window.focus) return true; window.open($wparams); return false;'")
+    #set ($linkicon="<img width='12' height='12' border='0' align='absmiddle' src='/dwa/images/newwindow.png' class='rendericon' alt=''/>")
+    ##
+    ## Do the output.
+    #if($paramstyle == 'embed' )
+        <p>
+        #if($vidType == 'ogg' || $vidType == 'ogv'  || $vidType == 'mp4')     ## Use the HTML-5 <video> tag to invoke the built-in player.
+	            <video $windowsize controls>
+                <source src="$url" type="video/ogg"/> Your browser does not support the video tag.
+            </video>
+            ##set($link="Right-click to display in <b>Full Screen</b> mode, or <a $aparms $onclick>click here</a> to open in a separate window.")
+            #set($link="To resize the video, go <a href=$url>here</a>.")
+        #else                                           ## Build an iframe to display the video.
+	            <iframe frameborder="$paramborder" $windowsize src="$url">&nbsp;</iframe>
+            ##<iframe frameborder="$paramborder" $windowsize src="$url">&nbsp;</iframe>
+            ##set($link="<a $aparms $onclick>Click to open in separate resizeable window. <sup>$linkicon</sup></a>")
+            #set($link="To resize the video, go <a href=$url>here</a>.")
+        #end
+        <br>
+        $link
+        </p>
+    #elseif($paramstyle == 'thumbnail' )
+        #set($link="<a $aparms $onclick><img class='confluence-embedded-image' src='$thumbpath' $windowsize></a>")
+        $link
+    #else ## Text link.
+        #set($link="<a $aparms $onclick>$paramtitle $linkicon</a>")
+        $link
+    #end
+#end

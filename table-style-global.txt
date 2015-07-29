@@ -1,0 +1,28 @@
+## Macro Name: table-style-global
+## Visibility: Visible to all users in the Macro Browser 
+## Macro Title: Table Style Global
+## Description: This macro lets the user specify the border width of all tables on the page at once
+## Categories: Formatting
+## Icon URL: http://mydw.anim.dreamworks.com/images/icons/macrobrowser/mydw_format.png
+## Documentation URL: http://mydw.anim.dreamworks.com/display/WIKIDOC/Table-Style+Macro
+## Macro Body Processing: No macro body
+## Output Format: HTML
+##
+## @param width:title=Width|type=enum|enumValues=0,1,2|default=0|desc=Set border width, limited to 0,1, or 2
+##
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = "${paramwidth}px")
+#end
+##
+<style>
+.confluenceTable th {
+    border: $border;
+    border-style: solid;
+}
+.confluenceTable td {
+    border: $border;
+    border-style: solid;
+}
+</style>

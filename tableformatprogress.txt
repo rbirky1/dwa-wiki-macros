@@ -1,0 +1,340 @@
+#* Table Format *#
+#* Takes a table object and removes the grid lines *#
+#* by Rachael Birky *#
+#* 06/11/14 *#
+## @noparams desc=Takes a table object and removes the grid lines
+
+
+## CSS attempt 1
+<!--
+<style type="text/css">
+.tableformat { 
+	border: 0px;
+}
+</style>
+
+<div class="tableformat">
+$body
+</div>
+-->
+
+
+## CSS attempt 2
+<style type="text/css">
+.tableformat { 
+	border: 0px;
+}
+</style>
+
+#set($nbody=$body)
+#if($param0 && $param0.length()>0)
+<div class="tableformat">$param0</div>
+#end
+$body
+</div>
+
+
+##WikiMarkup attempt
+#set($globalHelper=$action.getHelper())
+$globalHelper.renderConfluenceMacro("
+{table:title=$!param0|borderStyle=solid|borderColor=#3c78b5|borderWidth=0px}
+$body
+{table}")
+
+##Another way
+<style>
+    #com-atlassian-confluence th,
+    #com-atlassian-confluence td,$body
+    #com-atlassian-confluence .confluenceTh,
+    #com-atlassian-confluence .confluenceTd {
+        border: 0;
+    }
+</style>
+
+
+##FINAL
+<style>
+tableWrapper.confluenceTh {
+        border: 0;
+    }
+tableWrapper.confluenceTd {
+        border: 0;
+    }
+</style>
+
+<div id="tableWrapper">
+$body
+</div>
+
+#####################################################
+##With .css()
+#####################################################
+$(document).ready(function() {
+   $(function() {
+        $('.actionRow').hover(function() {
+            $(this).css('background-color', '#FFFF99');
+        },
+        function() {
+            $(this).css('background-color', '#FFFFFF');
+        });
+    });
+});
+
+#####################################################
+##With a parameter
+#####################################################
+#* Table Borders *#
+#* Takes a table object and allows the user to set the border width to 0, 1 or 2 pixels *#
+#* by Rachael Birky *#
+#* 06/11/14 *#
+## @param width:title=Width|type=enum|enumValues=0,1,2|desc=Set border width, limited to 0,1, or 2
+#set ( $paramWidth = "html=true" )
+#if ( $paramWidth )
+#set ( $width = "$paramWidth" )
+#end
+##
+<style>
+#tableWrapper .confluenceTh {
+        border: 0;
+    }
+#tableWrapper .confluenceTd {
+        border: 0;
+    }
+</style>
+##
+<div id="tableWrapper">
+$body
+</div>
+
+#####################################################
+##With Javascript
+#####################################################
+#* Table Borders *#
+#* Takes a table object and allows the user to set the border width to 0, 1 or 2 pixels *#
+#* by Rachael Birky *#
+#* 06/11/14 *#
+## @param width:title=Width|type=enum|enumValues=0,1,2|desc=Border width limited to 0 (none), 1, or 2
+##
+<script type="text/JavaScript">
+var width = $width;
+$(this).contents('td').css('border': width+'px');
+</script>
+##
+<div>## Macro title: tableFormat
+## Macro has a body: Y
+## Body processing: Rendered
+## Output: Selected output option
+##
+## Developed by: My Name
+## Date created: dd/mm/yyyy
+## Installed by: My Name
+## This macro takes a table and lets the user choose a border width limited to 0 (none), 1, or 2
+## @param width:title=Width|type=enum|enumValues="0px","1px","2px"|desc=Border width limited to 0 (none), 1, or 2
+
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = $paramwidth)
+#end
+
+<style>
+.tableWrapper confluenceTh {
+    border-style:solid;
+    border-width: $paramwidth
+}
+.tableWrapper confluenceTd {
+    border-style:solid;
+    border-width: $paramwidth
+}
+</style>
+
+<script type = "text/javascript">
+var border=$border;
+$(".tableWrapper confluenceTh").css("border-width", border);
+$(".tableWrapper confluenceTd").css("border-width", border);
+</script>
+
+<div class="tableWrapper">
+$body
+</div>
+$body
+</div>
+
+#####################################################
+##Works in Jfiddle...http://jsfiddle.net/g5qLc/9/
+#####################################################
+<style>
+.tableWrapper td {
+    border-style:solid;
+    border-width:1px;
+}
+</style>
+<script type="text/JavaScript">
+var paramborder="0px";
+$(".tableWrapper td").css("border-width", paramborder);
+</script>
+<div class="tableWrapper">
+<table>
+    <tr>
+        <td>rw1</td>
+        <td>rw1</td>
+        <td>rw1</td>
+    </tr>
+    <tr>
+        <td>rw1</td>
+        <td>rw1</td>
+        <td>rw1</td>
+    </tr>
+</table>
+</div>
+
+#####################################################
+##Convert
+#####################################################
+<style>
+.tableWrapper td {     ################################### edit syntax
+    border-style:solid;
+    border-width:1px;
+}
+</style>
+<script type="text/JavaScript">
+var paramborder="0px"; ################################### make param
+$(".tableWrapper td").css("border-width", paramborder);
+</script>
+<div class="tableWrapper">
+$body
+</div>
+
+
+
+###################################
+## Macro title: tableFormat
+## Macro has a body: Y
+## Body processing: Rendered
+## Output: Selected output option
+##
+## Developed by: My Name
+## Date created: dd/mm/yyyy
+## Installed by: My Name
+## This macro takes a table and lets the user choose a border width limited to 0 (none), 1, or 2
+## @param width:title=Width|type=enum|enumValues=0,1,2|desc=Border width limited to 0 (none), 1, or 2
+
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = $paramwidth)
+#end
+
+<style>
+.tableWrapper confluenceTh {
+    border-style:solid;
+}
+.tableWrapper confluenceTd {
+    border-style:solid;
+}
+</style>
+
+<script type = "text/javascript">
+var border="$border";
+$(".tableWrapper confluenceTh").css("border-width", border);
+$(".tableWrapper confluenceTd").css("border-width", border);
+</script>
+
+<div class="tableWrapper">
+$body
+</div>
+
+
+## Macro title: tableFormat
+## Macro has a body: Y
+## Body processing: Rendered
+## Output: Selected output option
+##
+## Developed by: My Name
+## Date created: dd/mm/yyyy
+## Installed by: My Name
+## This macro takes a table and lets the user choose a border width limited to 0 (none), 1, or 2
+## @param width:title=Width|type=enum|enumValues="0px","1px","2px"|desc=Border width limited to 0 (none), 1, or 2
+
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = $paramwidth)
+#end
+
+<style>
+.tableWrapper confluenceTh {
+    border-style:solid;
+    border-width: $paramwidth
+}
+.tableWrapper confluenceTd {
+    border-style:solid;
+    border-width: $paramwidth
+}
+</style>
+
+<script type = "text/javascript">
+var border=$border;
+$(".tableWrapper confluenceTh").css("border-width", border);
+$(".tableWrapper confluenceTd").css("border-width", border);
+</script>
+
+<div class="tableWrapper">
+$body
+</div>
+
+## Macro title: tableFormat
+## Macro has a body: Y
+## Body processing: Rendered
+##
+## Developed by: My Name
+## Date created: 06.19.2014
+## Installed by: 
+## This macro takes a table and lets the user choose a border width limited to 0 (none), 1, or 2
+## @param width:title=Width|type=enum|enumValues=0,1,2|desc=Set border width, limited to 0,1, or 2
+##
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = "${paramwidth}px")
+#end
+##
+<style>
+.tableWrapper th {
+    border: $border;
+    border-style: solid;
+}
+.tableWrapper td {
+    border: $border;
+    border-style: solid;
+}
+</style>
+##
+<div class=tableWrapper>
+$body
+</div>
+
+## This macro takes a table and lets the user choose a border width limited to 0 (none), 1, or 2
+## @param width:title=Width|type=enum|enumValues=0,1,2|desc=Set border width, limited to 0,1, or 2
+##
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = "${paramwidth}px")
+#end
+#set($id = "random" + $action.dateFormatter.calendar.timeInMillis)
+##
+<style>
+.$id th {
+    border: $border;
+    border-style: solid;
+}
+.$id td {
+    border: $border;
+    border-style: solid;
+}
+</style>
+##
+<div class=$id>
+$body
+</div>

@@ -1,0 +1,86 @@
+## Macro Name: bulletIconNew
+## Visibility: Visible to all users in the Macro Browser 
+## Macro Title: bulletIconNew
+## Description: This macro allows the user to define a new bullet icon image rather than use the default bullet icon.
+## Categories: Visuals & Images 
+## Icon URL: 
+## Documentation URL: http://mydw.anim.dreamworks.com/display/DOCS/Bulleticon+Macro
+## Macro Body Processing: Render HTML
+## Output Format: Wiki Markup
+## Macro title: bulleticonnew
+##
+##
+## @param size:title=Icon Size|type=string|desc=Sets the size of the icon. Optimized for 14px. Defaults to 14px.
+## @param 0:title=Name of Icon|type=string|required=true|desc=Sets the name of the attachment icon (image).
+##
+##
+##
+## This velocimacro (copied from imagemap macro) parses SPACEKEY:pagename^imagename syntax
+## and returns the attachment path in $imgpath.
+#macro( getattachmentPath $pstring )
+    #set ($pstring=$pstring.trim().replaceAll('[\[|\]]', ''))    ## Strip any square brackets
+    #if (!$pstring.contains(':') && !$pstring.contains('^'))     ## 90% case ... just an attachment.
+        #set ($imgpath=$content.getAttachmentNamed($param0).getDownloadPathWithoutVersion())
+    #else       ## Parse any space-key or page name.
+        #set ($spaceKey = $content.getSpaceKey())   ## Current space key.
+        #set ($pageName = $content.getTitle())      ## Current page name.
+        #set ($pstr = $pstring.replace('^', ':'))   ## So we can parse with a single split.
+        #set ($parray = [])                         ## Array we can load up with results of split.
+        #foreach($p in $pstr.split(':'))
+            #set($dummy = $parray.add($p))          ## The add() returns a boolean.
+        #end
+        #if ($pstring.contains(':'))                ## Contains a space key and page name.
+            #set ($spaceKey = $parray.get(0))
+            #set ($pageName = $parray.get(1))
+            #set ($attachmentName = $parray.get(2))
+        #elseif ($pstring.contains('^'))            ## Contains a page name only.
+            #set ($pageName = $parray.get(0))
+            #set ($attachmentName = $parray.get(1))
+        #else                                       ## Should only happen if string starts with ^.
+            #set ($attachmentName = $pstring)
+        #end
+        #if ($spaceKey == $content.getSpaceKey() && $pageName == $content.getTitle())  ## Attachment on this page.
+            #set ($imgpath=$content.getAttachmentNamed($attachmentName).getDownloadPathWithoutVersion())
+        #else       ## Attachment on another page.
+            #set($abstractPage = $pageManager.getPage($spaceKey,$pageName))
+            #set($imgpath=$abstractPage.getAttachmentNamed($attachmentName).getDownloadPathWithoutVersion())
+        #end
+    #end
+#end
+##
+#getattachmentPath ($param0.trim())     ## This calls the Velocimacro
+#set( $impath1 = $imgpath )
+#if (!$paramsize)
+  #set ($paramsize = "14px")
+#end
+##
+#set($id = "random" + $action.dateFormatter.calendar.timeInMillis)
+
+##
+<style>
+.wiki-content ul {list-style-image: none;}
+</style>
+<style type="text/css">
+.$id li {
+    background-image: url($impath1);
+    background-position: left center;
+    background-repeat: no-repeat;
+    background-size: $paramsize $paramsize;
+    line-height: 13px;
+    list-style-type: none;
+    margin-left: -18px;
+    padding-bottom: 3px;
+    padding-left: 18px;
+    padding-top: 3px;
+}
+.$id ul {
+   list-style-image: none;
+   margin-bottom: 10px;
+}
+.$id {
+    margin-bottom: -10px;
+}
+</style>
+<div class="$id">
+$body
+</div>

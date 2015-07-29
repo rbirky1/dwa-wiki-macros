@@ -1,0 +1,18 @@
+## User Macro hide-comments
+## Usage: {hide-comments}
+<style type="text/css">#com-atlassian-confluence #comments-section { display:none; } </style>
+
+## User Macro hide-likes
+<style type="text/css">
+  #likes-section{display:none !important;}
+</style>
+
+## User Macro hide-labels
+<style type="text/css">
+  #labels-section{display:none !important;}
+</style>
+
+## User Macro Hide Children
+<style type="text/css">
+div#children-section {display: none;}
+</style>

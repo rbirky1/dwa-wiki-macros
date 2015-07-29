@@ -1,0 +1,81 @@
+## @param image:title=Background Image|type=string|desc=Name of attached image file to be used as the background.
+## @param bgcolor:title=Background Color|type=string
+## @param repeat:title=Repeating Background|type=enum|enumValues=no-repeat,repeat-y,repeat-x,repeat,scale|desc=Sets if the background image repeats with the following options: no-repeat (aligns to the top center of the page), repeat-y (repeats vertically), repeat-x (repeats horizontally), repeat (repeats in both vertical and horizontal).
+## @param border:title=Border Width|type=string
+## @param radius:title=Border Curvature|type=string
+## @param borderColor:title=Border Color|type=string
+## @param text:title=Text Color|type=string|desc=Controls the color of the text (content on the page). Use simple color names or hex decimals (#000000).
+##
+##
+## This velocimacro (copied from imagemap macro) parses SPACEKEY:pagename^imagename syntax
+## and returns the attachment path in $imgpath.
+#macro( getattachmentPath $pstring )
+    #set ($pstring=$pstring.trim().replaceAll('[\[|\]]', ''))    ## Strip any square brackets
+    #if (!$pstring.contains(':') && !$pstring.contains('^'))     ## 90% case ... just an attachment.
+        #set ($imgpath=$content.getAttachmentNamed($paramimage).getDownloadPathWithoutVersion())
+    #else       ## Parse any space-key or page name.
+        #set ($spaceKey = $content.getSpaceKey())   ## Current space key.
+        #set ($pageName = $content.getTitle())      ## Current page name.
+        #set ($pstr = $pstring.replace('^', ':'))   ## So we can parse with a single split.
+        #set ($parray = [])                         ## Array we can load up with results of split.
+        #foreach($p in $pstr.split(':'))
+            #set($dummy = $parray.add($p))          ## The add() returns a boolean.
+        #end
+        #if ($pstring.contains(':'))                ## Contains a space key and page name.
+            #set ($spaceKey = $parray.get(0))
+            #set ($pageName = $parray.get(1))
+            #set ($attachmentName = $parray.get(2))
+        #elseif ($pstring.contains('^'))            ## Contains a page name only.
+            #set ($pageName = $parray.get(0))
+            #set ($attachmentName = $parray.get(1))
+        #else                                       ## Should only happen if string starts with ^.
+            #set ($attachmentName = $pstring)
+        #end
+        #if ($spaceKey == $content.getSpaceKey() && $pageName == $content.getTitle())  ## Attachment on this page.
+            #set ($imgpath=$content.getAttachmentNamed($attachmentName).getDownloadPathWithoutVersion())
+        #else       ## Attachment on another page.
+            #set($abstractPage = $pageManager.getPage($spaceKey,$pageName))
+            #set($imgpath=$abstractPage.getAttachmentNamed($attachmentName).getDownloadPathWithoutVersion())
+        #end
+    #end
+#end
+##
+#getattachmentPath ($paramimage.trim())     ## This calls the Velocimacro
+#set( $impath1 = $imgpath )
+##
+##
+#if(!$parambgcolor)
+#set($parambgcolor = "transparent")
+#end
+#set ($px="px")
+#if(!$paramborder)
+#set($paramborder="0px")
+#else
+#set($paramborder="$paramborder$px")
+#end
+#if(!$paramradius)
+#set($paramradius="0px")
+#else
+#set($paramradius="$paramradius$px")
+#end
+##
+#if($paramrepeat=="scale")
+#set($paramrepeat = "no-repeat")
+#set($backgroundsize = "100% 100%")
+#end
+#set($id = "random" + $action.dateFormatter.calendar.timeInMillis)
+##
+##.$id p, .wiki-content h1, .wiki-content h2, .wiki-content h3, .wiki-content h4, td{
+<style>
+.$id td{color: $paramtext;}
+.$id p{color: $paramtext;}
+.$id h1{color: $paramtext;}
+.$id h2{color: $paramtext;}
+.$id h3{color: $paramtext;}
+.$id h4{color: $paramtext;}
+</style>
+<div class=$id>
+<div style="background-image: url($impath1); background-repeat: $paramrepeat; background-size: $backgroundsize; background-color: $parambgcolor; border:$paramborder solid; border-radius:$paramradius; border-color:$paramborderColor; text:$paramtext;">
+$body
+</div>
+</div>

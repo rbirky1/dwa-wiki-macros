@@ -1,0 +1,109 @@
+## Macro Name: google-doc
+## Visibility: Visible to all users in the Macro Browser 
+## Macro Title: Google Doc
+## Description: This macro lets you display a Google Doc
+## Categories: External content
+## Icon URL: 
+## Documentation URL: 
+## Macro Body Processing: No macro body
+##
+## Developed by: Rachael Birky
+## Date created: 07/23/2014
+##
+## @param url:title=URL|type=string|required=true|desc=Document URL
+## @param edit:title=Edit Mode?|type=boolean|default=false|desc=Display editable version to those with editing permissions
+## @param size:title=Document Size|type=enum|enumValues=letter,tabloid,legal|default=letter|desc=Choose a document size
+## @param orient:title=Orientation|type=enum|enumValues=portrait,landscape|default=portrait|desc=Portrait or Landscape?
+##
+#set($aEdit = "${paramedit}")
+#set($aUrl = "${paramurl}")
+#if($aEdit == true)
+  #if($aUrl.contains("/pub?embedded=true"))
+    #set($aUrl = $aUrl.replace("/pub?embedded=true","/edit"))
+  #end
+  #if($aUrl.contains("/pub"))
+    #set($aUrl = $aUrl.replace("/pub","/edit"))
+  #end
+  #if($aUrl.contains("/edit"))
+    #set($aUrl=$aUrl)
+  #end
+#else
+  #if($aUrl.contains("/pub?embedded=true"))
+    #set($aUrl=$aUrl)
+  #end
+  #if($aUrl.contains("/pub"))
+    #set($aUrl = $aUrl.replace("/pub","/pub?embedded=true"))
+  #end
+  #if($aUrl.contains("/edit"))
+    #set($aUrl = $aUrl.replace("/edit","/pub?embedded=true"))
+  #end
+#end
+##
+#set($aSize = "${paramsize}")
+#set($aOrient = "${paramorient}")
+#if($aSize == "letter")
+  #if($aOrient == "portrait")
+    #set($height = "1200px")
+    #set($width = "1200px")
+  #else
+    #set($height = "1000px")
+    #set($width = "1300px")
+  #end
+#end
+#if($aSize == "tabloid")
+  #if($aOrient == "portrait")
+    #set($height = "1800px")
+    #set($width = "1200px")
+  #else
+    #set($height = "1200px")
+    #set($width = "1800px")
+  #end
+#end
+#if($aSize == "legal")
+  #if($aOrient == "portrait")
+    #set($height = "1500px")
+    #set($width = "1200px")
+  #else
+    #set($height = "1500px")
+    #set($width = "1000px")
+  #end
+#end
+##
+#set ($id = "random" + $action.dateFormatter.calendar.timeInMillis)
+##
+#if ($aEdit == true && $aUrl.contains("/edit"))
+<div align="center">
+<div style="width: 400.0px;">
+  <ac:structured-macro ac:name="warning">
+    <ac:parameter ac:name="title">DO NOT LOG IN BELOW!</ac:parameter>
+    <ac:rich-text-body>
+<ac:macro ac:name="expand">
+  <ac:parameter ac:name="title">If you see a login screen below, click here</ac:parameter>
+    <ac:rich-text-body>
+         <ac:emoticon ac:name="information"/> <span style="color: rgb(255,165,0);"> <strong>
+            <ac:macro ac:name="link-window">
+               <ac:parameter ac:name="linkText">Click here</ac:parameter>
+               <ac:parameter ac:name="href">http://gmail.dreamworks.com</ac:parameter>
+               <ac:parameter ac:name="tip">opens separate window</ac:parameter>
+             </ac:macro>
+            <span style="color: rgb(128,128,128);"> to re-login to your GMail account (http://gmail.dreamworks.com/), and then return to, or reload this page.</span>
+            </strong> </span></p>
+    </ac:rich-text-body>
+</ac:macro>
+    </ac:rich-text-body>
+  </ac:structured-macro>
+</div>
+</div>
+<div align="center">
+<p><strong> To share or email this document,
+            <ac:macro ac:name="link-window">
+               <ac:parameter ac:name="linkText">click here</ac:parameter>
+               <ac:parameter ac:name="href">$aUrl</ac:parameter>
+               <ac:parameter ac:name="tip">opens separate window</ac:parameter>
+             </ac:macro>
+</strong></p>
+</div>
+#end
+<div align="center" class=$id>
+<iframe id=$id src=$aUrl width=$width height=$height> <p></p></iframe> <br/>
+</div>

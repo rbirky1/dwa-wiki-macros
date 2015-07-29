@@ -1,0 +1,34 @@
+## Macro Name: table-style-local
+## Visibility: Visible to all users in the Macro Browser 
+## Macro Title: Table Style Local
+## Description: This macro lets you specify the border width of all tables in the macro
+## Categories: Formatting
+## Icon URL: http://mydw.anim.dreamworks.com/images/icons/macrobrowser/mydw_format.png
+## Documentation URL: http://mydw.anim.dreamworks.com/display/WIKIDOC/Table-Style-Local+Macro
+## Macro Body Processing: Rendered
+## Output Format: HTML
+##
+## Lets the user specify the border width (0,1, or 2px) of tables in the macro body. Note: This can be used to override the tableFormat macro.
+## @param width:title=Width|type=enum|enumValues=0,1,2|default=0|desc=Set border width, limited to 0,1, or 2
+##
+#if (!$paramwidth)
+#set ($border = "0px")
+#else
+#set($border = "${paramwidth}px")
+#end
+#set($id = "random" + $action.dateFormatter.calendar.timeInMillis)
+##
+<style>
+.$id th {
+    border: $border;
+    border-style: solid;
+}
+.$id td {
+    border: $border;
+    border-style: solid;
+}
+</style>
+##
+<div class=$id>
+$body
+</div>
